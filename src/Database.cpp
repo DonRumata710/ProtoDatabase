@@ -717,41 +717,6 @@ void Database::removeArray(const google::protobuf::Message& message, const googl
     query.exec();
 }
 
-std::string Database::getFieldStringValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field)
-{
-    switch (field->cpp_type())
-    {
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING:
-        return message.GetReflection()->GetString(message, field);
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32:
-        return std::to_string(message.GetReflection()->GetInt32(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64:
-        return std::to_string(message.GetReflection()->GetInt64(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32:
-        return std::to_string(message.GetReflection()->GetUInt32(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64:
-        return std::to_string(message.GetReflection()->GetUInt64(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL:
-        return (message.GetReflection()->GetBool(message, field) ? "TRUE" : "FALSE");
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE:
-        return std::to_string(message.GetReflection()->GetDouble(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT:
-        return std::to_string(message.GetReflection()->GetFloat(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM:
-        return std::to_string(message.GetReflection()->GetEnumValue(message, field));
-    case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE:
-    {
-        auto key = findMessage(message.GetReflection()->GetMessage(message, field));
-        if (!key)
-            throw std::runtime_error("No key object for " + message.GetTypeName() + " message");
-
-        return std::to_string(key.value());
-    }
-    default:
-        throw std::logic_error(std::string("Unsupported field type: ") + field->cpp_type_name());
-    }
-}
-
 void Database::clearTableImpl(const std::string& type)
 {
     database.exec("DELETE FROM " + type);

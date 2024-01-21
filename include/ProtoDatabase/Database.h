@@ -205,8 +205,6 @@ private:
     void writeArray(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, int64_t id) const;
     void removeArray(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field, int64_t id) const;
 
-    std::string getFieldStringValue(const google::protobuf::Message& message, const google::protobuf::FieldDescriptor* field);
-
     void clearTableImpl(const std::string& type);
 
     static std::string getFieldTableName(const google::protobuf::Descriptor*, const google::protobuf::FieldDescriptor* field);
