@@ -561,7 +561,7 @@ TEST_CASE("Key duplication test", "[smoketest]") {
 }
 
 TEST_CASE("Complex key duplication test", "[smoketest]") {
-    Database db("test.db");
+    Database db;
 
     srand(0);
 
@@ -614,4 +614,90 @@ TEST_CASE("Complex key duplication test", "[smoketest]") {
 
     msg2.set_data(generate_random_string(10));
     REQUIRE_THROWS(db.insertMessage(msg2));
+}
+
+TEST_CASE("Deletion test", "[smoketest]") {
+    Database db;
+
+    REQUIRE_NOTHROW(db.createTable<ComplexKeyTestMessage>());
+
+    ComplexKeyTestMessage::Position pos1;
+    pos1.set_x(4);
+    pos1.set_y(8);
+
+    std::vector<ComplexKeyTestMessage> objects;
+    {
+        ComplexKeyTestMessage msg;
+        *msg.mutable_pos() = pos1;
+
+        for (int j = 0; j < (rand() % 10) + 5; ++j)
+        {
+            msg.mutable_numvalues()->Add(rand());
+        }
+
+        msg.set_data(generate_random_string(10));
+        REQUIRE_NOTHROW(db.insertMessage(msg));
+        objects.emplace_back(std::move(msg));
+    }
+
+    ComplexKeyTestMessage::Position pos2;
+    pos2.set_x(15);
+    pos2.set_y(16);
+
+    {
+        ComplexKeyTestMessage msg;
+        *msg.mutable_pos() = pos2;
+
+        for (int j = 0; j < (rand() % 10) + 5; ++j)
+        {
+            msg.mutable_numvalues()->Add(rand());
+        }
+
+        msg.set_data(generate_random_string(10));
+        REQUIRE_NOTHROW(db.insertMessage(msg));
+        objects.emplace_back(std::move(msg));
+    }
+
+    {
+        std::vector<ComplexKeyTestMessage> res;
+        REQUIRE_NOTHROW(res = db.getAllMessages<ComplexKeyTestMessage>());
+        REQUIRE(res.size() == 2);
+    }
+
+    {
+        std::vector<ComplexKeyTestMessage::Position> posList;
+        REQUIRE_NOTHROW(posList = db.getAllMessages<ComplexKeyTestMessage::Position>());
+        REQUIRE(posList.size() == 2);
+    }
+
+    REQUIRE_NOTHROW(db.deleteMessage<ComplexKeyTestMessage>(ComplexKeyTestMessage::GetDescriptor()->FindFieldByNumber(ComplexKeyTestMessage::kPosFieldNumber), pos1));
+
+    {
+        std::vector<ComplexKeyTestMessage> res;
+        REQUIRE_NOTHROW(res = db.getAllMessages<ComplexKeyTestMessage>());
+        REQUIRE(res.size() == 1);
+        REQUIRE_NOTHROW(EqualMessages(res[0], objects[1]));
+    }
+
+    {
+        std::vector<ComplexKeyTestMessage::Position> posList;
+        REQUIRE_NOTHROW(posList = db.getAllMessages<ComplexKeyTestMessage::Position>());
+        REQUIRE(posList.size() == 1);
+        REQUIRE_NOTHROW(EqualMessages(posList[0], pos2));
+    }
+
+    REQUIRE_NOTHROW(db.deleteMessage<ComplexKeyTestMessage>(ComplexKeyTestMessage::GetDescriptor()->FindFieldByNumber(ComplexKeyTestMessage::kPosFieldNumber), pos1));
+    REQUIRE_NOTHROW(db.deleteMessage<ComplexKeyTestMessage>(ComplexKeyTestMessage::GetDescriptor()->FindFieldByNumber(ComplexKeyTestMessage::kPosFieldNumber), pos2));
+
+    {
+        std::vector<ComplexKeyTestMessage> res;
+        REQUIRE_NOTHROW(res = db.getAllMessages<ComplexKeyTestMessage>());
+        REQUIRE(res.empty());
+    }
+
+    {
+        std::vector<ComplexKeyTestMessage::Position> posList;
+        REQUIRE_NOTHROW(posList = db.getAllMessages<ComplexKeyTestMessage::Position>());
+        REQUIRE(posList.empty());
+    }
 }

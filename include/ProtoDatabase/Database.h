@@ -120,6 +120,35 @@ public:
 
     /**
      * @brief deleteMessage
+     * @param field - key field
+     * @param key - value for search
+     *
+     * Removes objects found by specified key
+     */
+    template<typename Message, typename Key>
+    void deleteMessage(const google::protobuf::FieldDescriptor* field, const Key& key)
+    {
+        if (!isKey(field))
+            throw std::logic_error("field is not a key for " + Message::GetDescriptor()->name());
+
+        SQLite::Statement query{ database, "DELETE FROM " + Message::GetDescriptor()->name() + " WHERE " + getColumnName(field->name()) + "=?;" };
+        if constexpr(std::is_base_of<google::protobuf::Message, Key>::value)
+        {
+            auto keyId = findMessage(key);
+            if (!keyId)
+                return;
+            query.bind(1, keyId.value());
+        }
+        else
+        {
+            query.bind(1, key);
+        }
+
+        query.exec();
+    }
+
+    /**
+     * @brief deleteMessage
      * @param message - object to be deleted
      *
      * Removes specified object from the table
