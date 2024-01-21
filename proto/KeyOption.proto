@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "google/protobuf/descriptor.proto";
+
+package ProtoDatabase.Proto;
+
+
+extend google.protobuf.FieldOptions {
+    optional bool objectKeyField = 50101;
+}
+
+extend google.protobuf.MessageOptions {
+    optional bool uniqueMessage = 50102;
+}

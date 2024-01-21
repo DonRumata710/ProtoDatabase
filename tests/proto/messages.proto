@@ -1,0 +1,88 @@
+syntax = "proto3";
+
+import "proto/KeyOption.proto";
+
+
+message TestMessage {
+    int32 value = 1;
+    string stringValue = 2;
+
+    message TestNestedMessage {
+        int32 value = 1;
+    }
+    TestNestedMessage nestedMessage = 3;
+
+    enum TestEnum {
+        val0 = 0;
+        val1 = 1;
+        val2 = 2;
+        val3 = 3;
+    }
+    TestEnum enumValue = 4;
+}
+
+message TestMap {
+    map<string, int32> data = 1;
+}
+
+message TestRepeated {
+    message TestMessage {
+        string strValue = 1;
+        int32 intValue = 2;
+    }
+    repeated TestMessage msg = 1;
+}
+
+message ComplexMessage {
+    message NestedMessage {
+        string name = 1;
+        repeated int32 value = 2;
+    }
+    repeated NestedMessage msg = 1;
+
+    message MapMessage {
+        int64 value = 1;
+        repeated string str = 2;
+    }
+    map<string, MapMessage> messageMap = 2;
+
+    repeated int32 values = 3;
+
+    string str = 4;
+    int32 numValue = 5;
+}
+
+message TestKeyMessage {
+    int32 index = 1 [(ProtoDatabase.Proto.objectKeyField) = true];
+
+    repeated int64 numValues = 3;
+    string data = 4;
+}
+
+message StringKeyMessage {
+    string name = 1 [(ProtoDatabase.Proto.objectKeyField) = true];
+    uint64 number = 2;
+    float floatNumber = 3;
+}
+
+message ComplexKeyTestMessage {
+    message Position {
+        option(ProtoDatabase.Proto.uniqueMessage) = true;
+
+        int32 x = 1;
+        int32 y = 2;
+    }
+
+    Position pos = 1 [(ProtoDatabase.Proto.objectKeyField) = true];
+
+    string data = 2;
+    repeated int64 numValues = 3;
+
+    enum TestEnum {
+        val0 = 0;
+        val1 = 1;
+        val2 = 2;
+        val3 = 3;
+    }
+    TestEnum enumValue = 4;
+}
