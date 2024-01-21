@@ -122,7 +122,7 @@ public:
      * @brief deleteMessage
      * @param message - object to be deleted
      *
-     * Removes all rows in the table of specified type
+     * Removes specified object from the table
      */
     void deleteMessage(const google::protobuf::Message& message);
 
