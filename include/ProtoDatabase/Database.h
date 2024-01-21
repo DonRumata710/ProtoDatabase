@@ -118,6 +118,11 @@ public:
         return res;
     }
 
+    /**
+     * @brief getValue
+     * @param field - selected data
+     * @return list of stored values
+     */
     template<typename Value, typename Message>
     std::vector<Value> getValue(const google::protobuf::FieldDescriptor* field)
     {
