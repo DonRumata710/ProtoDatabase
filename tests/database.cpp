@@ -701,3 +701,48 @@ TEST_CASE("Deletion test", "[smoketest]") {
         REQUIRE(posList.empty());
     }
 }
+
+TEST_CASE("Data selection test", "[smoketest]") {
+    Database db;
+
+    srand(0);
+
+    /*
+        message StringKeyMessage {
+            string name = 1 [(ProtoDatabase.Proto.objectKeyField) = true];
+            uint64 number = 2;
+            float floatNumber = 3;
+        }
+     */
+
+    REQUIRE_NOTHROW(db.createTable<StringKeyMessage>());
+
+    std::vector<float> data;
+    data.reserve(100);
+    std::vector<std::string> names;
+    names.reserve(100);
+    for (size_t i = 0; i < 100; ++i)
+    {
+        data.push_back(rand());
+
+        StringKeyMessage msg;
+        msg.set_name(generate_random_string(20));
+        msg.set_floatnumber(data[i]);
+
+        names.push_back(msg.name());
+
+        REQUIRE_NOTHROW(db.writeMessage(msg));
+    }
+
+    {
+        std::vector<float> res;
+        REQUIRE_NOTHROW(res = db.getValue<float, StringKeyMessage>(StringKeyMessage::GetDescriptor()->FindFieldByNumber(StringKeyMessage::kFloatNumberFieldNumber)));
+        REQUIRE(res == data);
+    }
+
+    {
+        std::vector<std::string> res;
+        REQUIRE_NOTHROW(res = db.getValue<std::string, StringKeyMessage>(StringKeyMessage::GetDescriptor()->FindFieldByNumber(StringKeyMessage::kNameFieldNumber)));
+        REQUIRE(res == names);
+    }
+}

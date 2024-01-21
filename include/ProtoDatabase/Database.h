@@ -118,6 +118,40 @@ public:
         return res;
     }
 
+    template<typename Value, typename Message>
+    std::vector<Value> getValue(const google::protobuf::FieldDescriptor* field)
+    {
+        SQLite::Statement query{ database, "SELECT " + getColumnName(field->name()) + " FROM " + Message::GetDescriptor()->name() + " ORDER BY id;" };
+
+        std::vector<Value> res;
+        while(query.executeStep())
+        {
+            Value val;
+            if constexpr(std::is_base_of_v<google::protobuf::FieldDescriptor, Value>)
+            {
+                findMessage(field->message_type()->name(), query.getColumn(0), &val);
+            }
+            else if constexpr(std::is_same_v<Value, uint64_t>)
+            {
+                val = static_cast<uint64_t>(query.getColumn(0).getInt64());
+            }
+            else if constexpr(std::is_same_v<Value, float>)
+            {
+                val = static_cast<float>(query.getColumn(0).getDouble());
+            }
+            else if constexpr(std::is_same_v<Value, std::string>)
+            {
+                val = query.getColumn(0).getString();
+            }
+            else
+            {
+                val = query.getColumn(0);
+            }
+            res.emplace_back(std::move(val));
+        }
+        return res;
+    }
+
     /**
      * @brief deleteMessage
      * @param field - key field

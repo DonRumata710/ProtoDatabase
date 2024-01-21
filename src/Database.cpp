@@ -379,7 +379,7 @@ void Database::readFields(SQLite::Statement& query, google::protobuf::Message* m
                     message->GetReflection()->AddUInt32(message, field, arrayQuery.getColumn(0));
                     break;
                 case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-                    message->GetReflection()->AddUInt64(message, field, atoi(arrayQuery.getColumn(0).getString().c_str()));
+                    message->GetReflection()->AddUInt64(message, field, static_cast<uint64_t>(arrayQuery.getColumn(0).getInt64()));
                     break;
                 case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
                     message->GetReflection()->AddDouble(message, field, arrayQuery.getColumn(0));
@@ -424,7 +424,7 @@ void Database::readFields(SQLite::Statement& query, google::protobuf::Message* m
                 message->GetReflection()->SetUInt32(message, field, query.getColumn(column));
                 break;
             case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64:
-                message->GetReflection()->SetUInt64(message, field, atoi(query.getColumn(column).getString().c_str()));
+                message->GetReflection()->SetUInt64(message, field, static_cast<uint64_t>(query.getColumn(0).getInt64()));
                 break;
             case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL:
                 message->GetReflection()->SetBool(message, field, (static_cast<int>(query.getColumn(column)) != 0 ? true : false));
@@ -546,7 +546,7 @@ void Database::insertMessageFields(SQLite::Statement& query, const google::proto
             query.bind(i + offset, message.GetReflection()->GetUInt32(message, field));
             break;
         case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64:
-            query.bind(i + offset, std::to_string(message.GetReflection()->GetUInt64(message, field)));
+            query.bind(i + offset, static_cast<int64_t>(message.GetReflection()->GetUInt64(message, field)));
             break;
         case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL:
             query.bind(i + offset, message.GetReflection()->GetBool(message, field) ? 1 : 0);
@@ -602,7 +602,7 @@ void Database::insertMessageRepeatedField(SQLite::Statement& query, const google
         break;
     case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64:
         for (size_t i = 1; i <= message.GetReflection()->FieldSize(message, field); ++i)
-            query.bind(i, std::to_string(message.GetReflection()->GetRepeatedUInt64(message, field, i - 1)));
+            query.bind(i, static_cast<int64_t>(message.GetReflection()->GetRepeatedUInt64(message, field, i - 1)));
         break;
     case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL:
         for (size_t i = 1; i <= message.GetReflection()->FieldSize(message, field); ++i)
